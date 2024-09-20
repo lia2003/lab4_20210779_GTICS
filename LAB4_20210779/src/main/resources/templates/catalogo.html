@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Catalogo</title>
@@ -17,41 +18,82 @@
         </a>
     </div>
 
+    <form th:action="@{/catalogo}" method="get">
+        <select name="color">
+            <option value="">Selecciona un color</option>
+            <option value="rojo">Rojo</option>
+            <option value="verde">Verde</option>
+            <option value="azul">Azul</option>
+            <option value="blanco">Blanco</option>
+            <option value="amarillo">Amarillo</option>
+        </select>
+        <select name="tipo">
+            <option value="">Selecciona un tipo</option>
+            <option value="rosa">Rosa</option>
+            <option value="clavel">Clavel</option>
+            <option value="hortencia">Hortencia</option>
+            <option value="girasol">Girasol</option>
+            <option value="tulipan">Tulipán</option>
+
+        </select>
+        <select name="ocasion">
+            <option value="">Selecciona una ocasión</option>
+            <option value="San Valentin">San Valentín</option>
+            <option value="Primavera">Primavera</option>
+            <option value="Aniversario">Aniversario</option>
+            <option value="Día de la Amistad">Día de la Amistad</option>
+            <option value="Día del Padre">Día del Padre</option>
+            <option value="Día de la Madre">Día de la Madre</option>
+            <option value="Condolencias">Condolencias</option>
+        </select>
+        <button type="submit">Filtrar</button>
+    </form>
+
     <div class="card-group">
-        <div class="card">
-            <img src="rosas_rojas.jpeg" class="card-img-top" width="20px" height="500px">
+        <div class="card" th:each="flor : ${flores}">
+            <img th:src="@{/images/{imagen}(imagen=${flor.imagen})}" class="card-img-top" height="500px">
             <div class="card-body">
-                <h5 class="card-title">ROSAS ROJAS</h5>
-                <p class="card-text">Estas rosas son las más clásicas!</p>
-                <p class="card-text"><small class="text-body-secondary">Precio: 50 soles </small></p>
+                <h5 class="card-title" th:text="${flor.nombre}"></h5>
+                <p class="card-text" th:text="${flor.descripcion}"></p>
+                <p class="card-text"><small class="text-body-secondary">Precio: <span th:text="${flor.precio}"></span> soles</small></p>
+
+                <!-- Botón de Añadir al carrito -->
+                <form th:action="@{/carrito/agregar}" method="post">
+                    <input type="hidden" name="florId" th:value="${flor.id}">
+                    <input type="hidden" name="cantidad" value="1">
+                    <button type="submit">Añadir al carrito</button>
+                </form>
+
+                <!-- Botón de Quitar del carrito -->
+                <form th:action="@{/carrito/quitar}" method="post">
+                    <input type="hidden" name="florId" th:value="${flor.id}">
+                    <button type="submit">Quitar del carrito</button>
+                </form>
+
+                <!-- Botón de Comprar directamente -->
+                <form th:action="@{/carrito/comprar}" method="post">
+                    <input type="hidden" name="florId" th:value="${flor.id}">
+                    <button type="submit">Comprar directamente</button>
+                </form>
             </div>
-            <button style="margin-bottom: 24px"> Añadir al carrito</button>
-            <button style="margin-bottom: 24px"> Quitar del carrito</button>
-            <button style="margin-bottom: 24px"> Comprar directamente</button>
-        </div>
-        <div class="card">
-            <img src="tulipanes_amarillos.png" class="card-img-top" width="20px" height="500px">
-            <div class="card-body">
-                <h5 class="card-title">Tulipanes amarillos</h5>
-                <p class="card-text">En cierto modo, nos animan y alegran el día. </p>
-                <p class="card-text"><small class="text-body-secondary">Precio: 45 soles </small></p>
-            </div>
-            <button style="margin-bottom: 24px"> Añadir al carrito</button>
-            <button style="margin-bottom: 24px"> Quitar del carrito</button>
-            <button style="margin-bottom: 24px"> Comprar directamente</button>
-        </div>
-        <div class="card">
-            <img src="hortencias_azules.png" class="card-img-top" width="20px" height="500px">
-            <div class="card-body">
-                <h5 class="card-title">Hortencias azules</h5>
-                <p class="card-text">Ideales para cualquier ocasión</p>
-                <p class="card-text"><small class="text-body-secondary">Precio: 40 soles </small></p>
-            </div>
-            <button style="margin-bottom: 24px"> Añadir al carrito</button>
-            <button style="margin-bottom: 24px"> Quitar del carrito</button>
-            <button style="margin-bottom: 24px"> Comprar directamente</button>
         </div>
     </div>
+
+    <div th:if="${carrito.isEmpty()}">
+        <h3>No tienes productos en tu carrito.</h3>
+    </div>
+    <div th:if="${!carrito.isEmpty()}">
+        <h3>Tus productos</h3>
+        <div th:each="item : ${carrito}">
+            <p th:text="${item.flor.nombre} + ' - Cantidad: ' + ${item.cantidad}"></p>
+            <p>Precio: <span th:text="${item.flor.precio}"></span></p>
+        </div>
+        <form th:action="@{/carrito/comprar}" method="post">
+            <button type="submit">Finalizar Compra</button>
+        </form>
+    </div>
+
+    <p>Total de flores disponibles: <span th:text="${totalFlores}"></span></p>
 
 </body>
 </html>
